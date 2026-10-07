@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Simulated traffic intensity (events per second, average).
+      - EVENTS_PER_SECOND=8
+      # To use a real Kafka broker instead of the in-memory bus, set this
+      # and follow app/kafka_adapter.py. (Also add a kafka service here.)
+      # - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # The dashboard runs in the browser, so these must be reachable
+        # from the user's machine, not just inside Docker.
+        - VITE_WS_URL=ws://localhost:8000/ws/metrics
+        - VITE_API_URL=http://localhost:8000
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
